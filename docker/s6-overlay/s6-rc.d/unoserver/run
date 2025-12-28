@@ -1,0 +1,5 @@
+#!/command/execlineb -P
+with-contenv
+
+# Run unoserver listening on localhost:2003
+exec unoserver --interface 127.0.0.1 --port 2003

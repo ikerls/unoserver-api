@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
+
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+# See also https://symfony.com/doc/current/service_container/import.html
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    env(UNOCONVERT_BINARY): 'unoconvert'
+    env(UNOSERVER_HOST): '127.0.0.1'
+    env(UNOSERVER_PORT): '2003'
+    env(UNOSERVER_TIMEOUT): '120'
+    env(UNOSERVER_STREAM_THRESHOLD): '10485760'
+    env(UPLOAD_MAX_SIZE): '100M'
+
+    unoserver.binary: '%env(string:UNOCONVERT_BINARY)%'
+    unoserver.host: '%env(string:UNOSERVER_HOST)%'
+    unoserver.port: '%env(int:UNOSERVER_PORT)%'
+    unoserver.timeout: '%env(int:UNOSERVER_TIMEOUT)%'
+    unoserver.stream_threshold: '%env(int:UNOSERVER_STREAM_THRESHOLD)%' # 10MB default
+    upload.max_size: '%env(string:UPLOAD_MAX_SIZE)%'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+
+    # Unoconvert service configuration
+    App\Service\UnoconvertService:
+        arguments:
+            $unoconvertBinary: '%unoserver.binary%'
+            $unoserverHost: '%unoserver.host%'
+            $unoserverPort: '%unoserver.port%'
+            $timeout: '%unoserver.timeout%'
+            $streamThreshold: '%unoserver.stream_threshold%'
+
+    App\Service\UnoconvertServiceInterface: '@App\Service\UnoconvertService'
+
+    App\Controller\ConvertAction:
+        arguments:
+            $uploadMaxSize: '%upload.max_size%'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones

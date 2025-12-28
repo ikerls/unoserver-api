@@ -1,0 +1,29 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Unoserver API
+            description: |
+                REST API for document conversion to PDF using LibreOffice via unoserver.
+
+                This API provides endpoints for converting documents from various formats to PDF, including:
+                - **Documents**: DOCX, DOC, ODT, RTF, TXT, HTML, EPUB
+                - **Spreadsheets**: XLSX, XLS, ODS, CSV
+                - **Presentations**: PPTX, PPT, ODP
+                - **Images**: PNG, JPG, GIF, BMP, SVG, TIFF
+
+                The conversion process supports a wide range of LibreOffice PDF export options, such as page ranges, watermarks, encryption, and digital signatures.
+            version: 1.0.0
+            contact:
+                name: API Support
+        tags:
+            - name: PDF Conversion
+              description: Operations for converting documents to PDF
+            - name: Health
+              description: API health and status checks
+        servers:
+            - url: /
+              description: Current server
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/convert$
+            - ^/health$
