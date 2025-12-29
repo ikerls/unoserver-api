@@ -1,0 +1,492 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Unoserver API",
+        "description": "REST API for document conversion to PDF using LibreOffice via unoserver.\n\nThis API provides endpoints for converting documents from various formats to PDF, including:\n- **Documents**: DOCX, DOC, ODT, RTF, TXT, HTML, EPUB\n- **Spreadsheets**: XLSX, XLS, ODS, CSV\n- **Presentations**: PPTX, PPT, ODP\n- **Images**: PNG, JPG, GIF, BMP, SVG, TIFF\n\nThe conversion process supports a wide range of LibreOffice PDF export options, such as page ranges, watermarks, encryption, and digital signatures.\n",
+        "contact": {
+            "name": "API Support"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Current server"
+        }
+    ],
+    "paths": {
+        "/convert": {
+            "post": {
+                "tags": [
+                    "PDF Conversion"
+                ],
+                "summary": "Convert a document to PDF",
+                "description": "Converts a document to PDF using LibreOffice via unoserver. Supports all LibreOffice PDF export options as individual form fields.",
+                "operationId": "post_api_convert",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ConvertRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully converted document to PDF",
+                        "headers": {
+                            "Content-Disposition": {
+                                "description": "Attachment with converted filename",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (missing file, invalid options, etc.)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "No file uploaded"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Conversion failed",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Document conversion failed"
+                                        },
+                                        "details": {
+                                            "type": "string",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "504": {
+                        "description": "Conversion timed out",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Document conversion timed out"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/health": {
+            "get": {
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health check endpoint",
+                "description": "Returns the health status of the API.",
+                "operationId": "get_api_health",
+                "responses": {
+                    "200": {
+                        "description": "Service is healthy",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "ok"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ConvertRequest": {
+                "description": "Document to PDF conversion request. Supports all LibreOffice PDF export options.",
+                "properties": {
+                    "pageRange": {
+                        "description": "Range of pages to export (e.g., \"2-\" to skip first page, \"1-5\", \"1,3,5-7\"). Empty exports all pages.",
+                        "type": "string",
+                        "default": null,
+                        "example": "1-5",
+                        "nullable": true
+                    },
+                    "useLosslessCompression": {
+                        "description": "Use lossless compression (PNG) instead of JPEG for images.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "quality": {
+                        "description": "JPEG quality (1-100). Higher = better quality, larger file.",
+                        "type": "integer",
+                        "default": null,
+                        "maximum": 100,
+                        "minimum": 1,
+                        "example": 90,
+                        "nullable": true
+                    },
+                    "reduceImageResolution": {
+                        "description": "Reduce image resolution to MaxImageResolution value.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "maxImageResolution": {
+                        "description": "Target DPI when reduceImageResolution is true. Values: 75, 150, 300, 600, 1200.",
+                        "type": "integer",
+                        "default": null,
+                        "enum": [
+                            75,
+                            150,
+                            300,
+                            600,
+                            1200
+                        ],
+                        "example": 300,
+                        "nullable": true
+                    },
+                    "selectPdfVersion": {
+                        "description": "PDF version: 0=PDF 1.7, 1=PDF/A-1b, 2=PDF/A-2b, 3=PDF/A-3b, 15=PDF 1.5, 16=PDF 1.6, 17=PDF 1.7.",
+                        "type": "integer",
+                        "default": null,
+                        "enum": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            15,
+                            16,
+                            17
+                        ],
+                        "example": 0,
+                        "nullable": true
+                    },
+                    "pdfUaCompliance": {
+                        "description": "Create accessible PDF following PDF/UA (ISO 14289) specification.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "useTaggedPdf": {
+                        "description": "Create tagged PDF for accessibility.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "exportFormFields": {
+                        "description": "Export form fields as widgets.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": true,
+                        "nullable": true
+                    },
+                    "formsType": {
+                        "description": "Form submit format: 0=FDF, 1=PDF, 2=HTML, 3=XML.",
+                        "type": "integer",
+                        "default": null,
+                        "enum": [
+                            0,
+                            1,
+                            2,
+                            3
+                        ],
+                        "example": 0,
+                        "nullable": true
+                    },
+                    "allowDuplicateFieldNames": {
+                        "description": "Allow multiple form fields with same name.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "exportBookmarks": {
+                        "description": "Export bookmarks to PDF.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": true,
+                        "nullable": true
+                    },
+                    "exportPlaceholders": {
+                        "description": "Export placeholder field visual markings.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "exportNotes": {
+                        "description": "Export notes/comments to PDF.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "exportNotesPages": {
+                        "description": "Export notes pages (Impress only).",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "exportOnlyNotesPages": {
+                        "description": "Export only notes pages when exportNotesPages is true.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "exportNotesInMargin": {
+                        "description": "Export notes in margin.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "exportHiddenSlides": {
+                        "description": "Export slides not in slide show (Impress only).",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "isSkipEmptyPages": {
+                        "description": "Suppress auto-inserted empty pages (Writer only).",
+                        "type": "boolean",
+                        "example": false,
+                        "nullable": true
+                    },
+                    "embedStandardFonts": {
+                        "description": "Embed the 14 standard PDF fonts.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "isAddStream": {
+                        "description": "Insert stream with original document for archiving.",
+                        "type": "boolean",
+                        "example": false,
+                        "nullable": true
+                    },
+                    "watermark": {
+                        "description": "Watermark text drawn on every page.",
+                        "type": "string",
+                        "default": null,
+                        "example": "CONFIDENTIAL",
+                        "nullable": true
+                    },
+                    "watermarkColor": {
+                        "description": "Watermark text color as integer (default: 8388223 light green).",
+                        "type": "integer",
+                        "default": null,
+                        "example": 8388223,
+                        "nullable": true
+                    },
+                    "watermarkFontHeight": {
+                        "description": "Watermark font height.",
+                        "type": "integer",
+                        "default": null,
+                        "minimum": 0,
+                        "nullable": true
+                    },
+                    "watermarkRotateAngle": {
+                        "description": "Watermark text rotation angle.",
+                        "type": "integer",
+                        "default": null,
+                        "nullable": true
+                    },
+                    "watermarkFontName": {
+                        "description": "Watermark font name.",
+                        "type": "string",
+                        "default": null,
+                        "example": "Helvetica",
+                        "nullable": true
+                    },
+                    "tiledWatermark": {
+                        "description": "Tiled watermark text.",
+                        "type": "string",
+                        "default": null,
+                        "example": "DRAFT",
+                        "nullable": true
+                    },
+                    "useReferenceXObject": {
+                        "description": "Use reference XObject markup for vector images.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "isRedactMode": {
+                        "description": "Enable redaction mode.",
+                        "type": "boolean",
+                        "example": false,
+                        "nullable": true
+                    },
+                    "singlePageSheets": {
+                        "description": "Put every sheet on exactly one page, ignoring paper size and print ranges.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "exportBookmarksToPdfDestination": {
+                        "description": "Export bookmarks as Named Destinations.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "convertOooTargetToPdfTarget": {
+                        "description": "Convert .od* extensions to .pdf in links.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "exportLinksRelativeFsys": {
+                        "description": "Export file:// links relative to source document.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "encryptFile": {
+                        "description": "Encrypt PDF with password.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "documentOpenPassword": {
+                        "description": "Password to open encrypted PDF.",
+                        "type": "string",
+                        "default": null,
+                        "example": "secret",
+                        "nullable": true
+                    },
+                    "restrictPermissions": {
+                        "description": "Restrict some permissions with password.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": false,
+                        "nullable": true
+                    },
+                    "permissionPassword": {
+                        "description": "Password to change restricted permissions.",
+                        "type": "string",
+                        "default": null,
+                        "nullable": true
+                    },
+                    "printing": {
+                        "description": "Printing allowed: 0=none, 1=low resolution, 2=max resolution.",
+                        "type": "integer",
+                        "default": null,
+                        "enum": [
+                            0,
+                            1,
+                            2
+                        ],
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "changes": {
+                        "description": "Changes allowed: 0=none, 1=insert/delete/rotate pages, 2=fill forms, 3=forms+comments, 4=all except extraction.",
+                        "type": "integer",
+                        "default": null,
+                        "enum": [
+                            0,
+                            1,
+                            2,
+                            3,
+                            4
+                        ],
+                        "example": 4,
+                        "nullable": true
+                    },
+                    "enableCopyingOfContent": {
+                        "description": "Allow copying pages and content.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": true,
+                        "nullable": true
+                    },
+                    "enableTextAccessForAccessibilityTools": {
+                        "description": "Allow content extraction for accessibility.",
+                        "type": "boolean",
+                        "default": null,
+                        "example": true,
+                        "nullable": true
+                    },
+                    "updateIndex": {
+                        "description": "Update document indexes before conversion (table of contents, etc.).",
+                        "type": "boolean",
+                        "default": true,
+                        "example": true,
+                        "nullable": true
+                    },
+                    "outputFile": {
+                        "description": "Custom output filename (without extension). If not provided, uses the original filename.",
+                        "type": "string",
+                        "default": null,
+                        "example": "converted-document",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "PDF Conversion",
+            "description": "Operations for converting documents to PDF"
+        },
+        {
+            "name": "Health",
+            "description": "API health and status checks"
+        }
+    ]
+}
