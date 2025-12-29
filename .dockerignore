@@ -1,0 +1,60 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# IDE
+.idea/
+.vscode/
+.fleet/
+*.swp
+*.swo
+*~
+
+# Documentation
+*.md
+
+# Docker
+compose*.yaml
+.dockerignore
+
+# Development tools
+Justfile
+.editorconfig
+.php-cs-fixer.dist.php
+phpstan.dist.neon
+phpunit.dist.xml
+
+# Cache and logs
+var/cache/*
+var/log/*
+var/tmp/*
+
+# Tests
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# Build artifacts
+vendor/
+node_modules/
+
+# Environment files
+.env
+.env.*
+!.env.prod
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+*.log
