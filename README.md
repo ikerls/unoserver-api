@@ -40,7 +40,7 @@ Create a `compose.yaml` file:
 ```yaml
 services:
   php:
-    image: unoserver-api:latest
+    image: ghcr.io/ikerls/unoserver-api:latest
     ports:
       - "8088:8080"
     environment:
@@ -68,7 +68,7 @@ docker run -d \
   -p 8080:8080 \
   -e UNOSERVER_TIMEOUT=120 \
   -e UPLOAD_MAX_SIZE=100M \
-  unoserver-api:latest
+  ghcr.io/ikerls/unoserver-api:latest
 ```
 
 ## API Documentation
