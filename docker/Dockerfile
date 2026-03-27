@@ -1,7 +1,7 @@
 ############################################
 # Base Image
 ############################################
-FROM serversideup/php:8.5-fpm-nginx-alpine-v4.2.1 AS base
+FROM serversideup/php:8.5-fpm-nginx-alpine-v4.3.4 AS base
 
 USER root
 
