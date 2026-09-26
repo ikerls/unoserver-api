@@ -1,7 +1,7 @@
 ############################################
 # Base Image
 ############################################
-FROM serversideup/php:8.5-fpm-nginx-alpine-v4.3.4 AS base
+FROM serversideup/php:8.5.10-fpm-nginx-alpine AS base
 
 USER root
 
@@ -30,7 +30,7 @@ RUN apk add --no-cache \
     # MS Core fonts compatibility \
     msttcorefonts-installer \
     # Install unoserver via pip \
-    && pip3 install --no-cache-dir --break-system-packages unoserver \
+    && pip3 install --no-cache-dir --break-system-packages unoserver==3.7 \
     # Update MS fonts \
     && update-ms-fonts \
     # Rebuild font cache \
